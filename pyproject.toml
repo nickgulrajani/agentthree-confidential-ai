@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentthree-confidential-ai"
+version = "0.1.0"
+description = "Portfolio demo: Confidential AI for regulated industries (attestation-gated KMS decrypt)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "AgentThree" }]
+dependencies = [
+  "cryptography>=42.0.0",
+  "PyYAML>=6.0.1",
+  "click>=8.1.7",
+  "rich>=13.7.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0"]
+
+[project.scripts]
+agentthree-cai = "agentthree_confidential_ai.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

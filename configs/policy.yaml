@@ -1,0 +1,47 @@
+# Attestation-gated access policy (local stand-in for GCP IAM + Confidential Space)
+# In production: image digests, PCR measurements, and Cloud KMS IAM conditions.
+
+policy_version: "2026.1"
+environment: local-simulation
+
+# Workloads allowed to unwrap DEKs after successful quote verification
+attested_workloads:
+  - workload_id: llm-inference-vllm
+    image_digest: sha256:demo-attested-vllm-0001
+    allowed_purposes:
+      - inference
+      - phi_redaction_assist
+    kms_key: projects/demo/locations/global/keyRings/cai/cryptoKeys/phi-dek
+    max_token_ttl_seconds: 300
+
+  - workload_id: audit-exporter
+    image_digest: sha256:demo-attested-audit-0001
+    allowed_purposes:
+      - audit_export
+    kms_key: projects/demo/locations/global/keyRings/cai/cryptoKeys/audit-signing
+    max_token_ttl_seconds: 60
+
+# Explicit denials (defense in depth)
+deny_workloads:
+  - workload_id: rogue-notebook
+    reason: "Unattested interactive notebook — no TEE measurement"
+  - workload_id: plain-gce-vm
+    reason: "Runs outside Confidential Space / CVM"
+
+# Data classification → key mapping
+data_classes:
+  PHI:
+    kms_key: projects/demo/locations/global/keyRings/cai/cryptoKeys/phi-dek
+    require_attestation: true
+    require_purpose: inference
+  PII_BANKING:
+    kms_key: projects/demo/locations/global/keyRings/cai/cryptoKeys/banking-dek
+    require_attestation: true
+    require_purpose: inference
+  PUBLIC:
+    kms_key: null
+    require_attestation: false
+
+audit:
+  log_path: audit/logs/access.jsonl
+  retain_days: 2555  # ~7 years — typical healthcare/banking retention signal
