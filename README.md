@@ -8,6 +8,24 @@ An attested TEE workload receives permission to decrypt sensitive data. An untru
 
 ---
 
+## Implementation status
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Attestation → IAM → KMS unwrap → audit control flow | **Implemented (local simulation)** | ALLOW for attested workload; DENY for untrusted |
+| Simulated SEV-SNP-style quotes | **Implemented (local)** | Forged / missing TEE fails closed |
+| Local KMS + DEK unwrap | **Implemented (local crypto)** | Simulates cloud KMS policy binding |
+| JSONL audit trail | **Implemented** | ALLOW and DENY both recorded |
+| Multi-cloud architecture docs (GCP primary) | **Documented** | AWS Nitro / Azure CC comparison |
+| Terraform (`terraform/gcp/`) | **Optional scaffolding only** | Billable **only if you `apply`** — not used by demo |
+| Live Confidential Space / GKE / Nitro / ACC | **Not deployed** | Production mapping in docs — no cloud project required |
+
+**Simulated vs cloud:** The runnable demo proves the *control plane* (attest → authorize → decrypt → audit) with local crypto. Hardware quotes, Cloud KMS, and Confidential VMs are **not** provisioned; see [docs/architecture-overview.md](docs/architecture-overview.md).
+
+Architecture diagram: [docs/architecture-overview.md](docs/architecture-overview.md)
+
+---
+
 ## What you can show in an interview
 
 ```text
@@ -48,6 +66,18 @@ agentthree-cai demo
 agentthree-cai audit-show
 pytest -q
 ```
+
+### Reproducible tests
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+pytest -q
+agentthree-cai demo
+agentthree-cai audit-show
+```
+
+Expected: pytest proves attested **ALLOW** and untrusted **DENY**; demo prints both outcomes; `audit-show` lists matching JSONL events. No GCP/AWS/Azure credentials required.
 
 ## Repository layout
 
