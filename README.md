@@ -4,21 +4,23 @@
 
 An attested TEE workload receives permission to decrypt sensitive data. An untrusted workload is denied. IAM, KMS, and audit trails enforce and record the decision.
 
+Companion browser lab: [Confidential Computing & Trusted AI](https://agentthree.ai/solutions/confidential-computing)
+
 > **Non-billable portfolio demo.** Run everything locally with zero cloud cost. GCP Confidential Space / Confidential GKE are the primary *documented* production path; AWS Nitro Enclaves and Azure Confidential Computing are comparison architectures. Optional Terraform is scaffolding only — not required for the demo.
 
 ---
 
 ## Status
 
-**Last verified:** 2026-10-17 · suite green via [`make verify`](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio#verify-everything) in the [AI Engineering Portfolio](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio) monorepo ([CI](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio/actions/workflows/verify.yml)).
+**Last verified:** 2026-10-18 · suite green via [`make verify`](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio#verify-everything) in the [AI Engineering Portfolio](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio) monorepo ([CI](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio/actions/workflows/verify.yml)).
 
 
 ## Implementation status
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Attestation → IAM → KMS unwrap → audit control flow | **Implemented (local simulation)** | ALLOW for attested workload; DENY for untrusted |
-| Simulated SEV-SNP-style quotes | **Implemented (local)** | Forged / missing TEE fails closed |
+| Attestation → IAM → KMS unwrap → audit control flow | **Implemented (local simulation)** | ALLOW for attested; DENY for untrusted / bad digest / debug / expired |
+| Simulated SEV-SNP-style quotes | **Implemented (local)** | Forged, debug-mode, and expired tokens fail closed |
 | Local KMS + DEK unwrap | **Implemented (local crypto)** | Simulates cloud KMS policy binding |
 | JSONL audit trail | **Implemented** | ALLOW and DENY both recorded |
 | Multi-cloud architecture docs (GCP primary) | **Documented** | AWS Nitro / Azure CC comparison |
@@ -36,6 +38,9 @@ Architecture diagram: [docs/architecture-overview.md](docs/architecture-overview
 ```text
 Attested  llm-inference-vllm  →  ALLOW  (KMS unwrap succeeds inside TEE path)
 Untrusted rogue-notebook      →  DENY   (forged quote / deny-list / no TEE)
+Wrong image digest            →  DENY   (IAM_IMAGE_MISMATCH)
+Debug mode TEE                →  DENY   (TEE_DEBUG_MODE — no key release)
+Expired attestation token     →  DENY   (QUOTE_EXPIRED)
 ```
 
 Plus a written multi-cloud map: **GCP (primary) · AWS Nitro · Azure CC**.
@@ -82,7 +87,7 @@ agentthree-cai demo
 agentthree-cai audit-show
 ```
 
-Expected: pytest proves attested **ALLOW** and untrusted **DENY**; demo prints both outcomes; `audit-show` lists matching JSONL events. No GCP/AWS/Azure credentials required.
+Expected: pytest proves attested **ALLOW** and deny paths (untrusted, wrong digest, debug mode, expired token, wrong purpose); demo prints ALLOW/DENY; `audit-show` lists matching JSONL events. No GCP/AWS/Azure credentials required.
 
 ## Repository layout
 
@@ -92,7 +97,7 @@ Expected: pytest proves attested **ALLOW** and untrusted **DENY**; demo prints b
 | `configs/policy.yaml` | Attested allow-list, deny-list, data classifications |
 | `docs/` | GCP primary + AWS/Azure comparison + regulated-industry narrative |
 | `terraform/gcp/` | **Optional** KMS/IAM stubs (billable only if you `apply`) |
-| `tests/` | Proof: attested ALLOW, untrusted DENY |
+| `tests/` | Proof: attested ALLOW + deny paths (digest, debug, expiry, purpose) |
 
 ## Documentation index
 
