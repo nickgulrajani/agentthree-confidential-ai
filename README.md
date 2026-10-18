@@ -33,7 +33,7 @@ Architecture diagram: [docs/architecture-overview.md](docs/architecture-overview
 
 ---
 
-## What you can show in an interview
+## Key Points
 
 ```text
 Attested  llm-inference-vllm  →  ALLOW  (KMS unwrap succeeds inside TEE path)
