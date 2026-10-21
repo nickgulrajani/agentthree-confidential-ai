@@ -12,7 +12,9 @@ Companion browser lab: [Confidential Computing & Trusted AI](https://agentthree.
 
 ## Status
 
-**Last verified:** 2026-10-18 · suite green via [`make verify`](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio#verify-everything) in the [AI Engineering Portfolio](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio) monorepo ([CI](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio/actions/workflows/verify.yml)).
+[![Verify](https://github.com/nickgulrajani/agentthree-confidential-ai/actions/workflows/verify.yml/badge.svg)](https://github.com/nickgulrajani/agentthree-confidential-ai/actions/workflows/verify.yml)
+
+**Last verified:** 2026-10-18 · suite green via [`make verify`](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio#verify-everything) in the [AI Engineering Portfolio](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio) monorepo ([CI](https://github.com/nickgulrajani/agentthree-ai-engineering-portfolio/actions/workflows/verify.yml)). This repo also runs pytest on push, PR, and a nightly schedule.
 
 
 ## Implementation status
